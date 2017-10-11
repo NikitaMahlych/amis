@@ -1,0 +1,48 @@
+CREATE TABLE `Customer` (
+  `First Name` Varchar(20),
+  `Last Name` Varchar(20),
+  `Email` Varchar(50),
+  `Country` Varchar(50),
+  PRIMARY KEY (`Email`)
+);
+
+CREATE TABLE `Participant` (
+  `First Name` Varchar(20),
+  `Last Name` Varchar(20),
+  `Email` Varchar(50),
+  `Country` Varchar(50),
+  PRIMARY KEY (`Email`)
+);
+
+CREATE TABLE `Vote` (
+  `Vote ID` Int,
+  `Cust Email` Varchar(20),
+  `Part Email` Varchar(20),
+  PRIMARY KEY (`Vote ID`),
+  KEY `FK` (`Cust Email`, `Part Email`)
+);
+
+CREATE TABLE `Like` (
+  `Like ID` Int,
+  `Cust Email` Varchar(20),
+  `Part Email` Varchar(20),
+  PRIMARY KEY (`Like ID`),
+  KEY `FK` (`Cust Email`, `Part Email`)
+);
+
+CREATE TABLE `Letter` (
+  `Letter ID` Int,
+  `Cust Email` Varchar(20),
+  `Part Email` Varchar(20),
+  PRIMARY KEY (`Letter ID`),
+  KEY `FK` (`Cust Email`, `Part Email`)
+);
+
+CREATE TABLE `Gift` (
+  `Gift ID` Int,
+  `Cust Email` Varchar(20),
+  `Part Email` Varchar(20),
+  PRIMARY KEY (`Gift ID`),
+  KEY `FK` (`Cust Email`, `Part Email`)
+);
+
