@@ -1,0 +1,293 @@
+/*==============================================================*/
+/* DBMS name:      ORACLE Version 11g                           */
+/* Created on:     1/21/2018 2:53:24 AM                         */
+/*==============================================================*/
+
+
+alter table GIFT
+   drop constraint FK_GIFT_EXS_IN_GL;
+
+alter table GIFT
+   drop constraint FK_USER_SEND_GIFT;
+
+alter table LETTER
+   drop constraint FK_USER_SEND_LETTER;
+
+alter table "USER"
+   drop constraint FK_USER_VOTE;
+
+alter table VOTE
+   drop constraint FK_VOTE_USER;
+
+drop index USER_SENDS_A_GIFT_FK;
+
+drop table GIFT cascade constraints;
+
+drop table GIFT_LIST cascade constraints;
+
+drop index USER_SENDS_A_LETTER_FK;
+
+drop table LETTER cascade constraints;
+
+drop index USER_IS_VOTING_FK;
+
+drop table "USER" cascade constraints;
+
+drop index USER_IS_VOTING2_FK;
+
+drop table VOTE cascade constraints;
+
+/*==============================================================*/
+/* Table: GIFT                                                  */
+/*==============================================================*/
+create table GIFT 
+(
+   GIFT_ID_FK           INTEGER              not null,
+   GIFT_NAME_FK         VARCHAR2(33)         not null,
+   USER_ID_FK           INTEGER              not null,
+   constraint PK_GIFT primary key (GIFT_ID_FK)
+);
+
+/*==============================================================*/
+/* Index: USER_SENDS_A_GIFT_FK                                  */
+/*==============================================================*/
+create index USER_SENDS_A_GIFT_FK on GIFT (
+   USER_ID_FK ASC
+);
+
+/*==============================================================*/
+/* Table: GIFT_LIST                                             */
+/*==============================================================*/
+create table GIFT_LIST 
+(
+   GIFT_ID              INTEGER              not null,
+   GIFT_NAME            VARCHAR2(33)         not null,
+   GIFT_LIST_CAPACITY   SMALLINT             not null,
+   GIFT_DESCRIPTION     VARCHAR2(33),
+   constraint PK_GIFT_LIST primary key (GIFT_ID)
+);
+
+/*==============================================================*/
+/* Table: LETTER                                                */
+/*==============================================================*/
+create table LETTER 
+(
+   LETTER_ID            INTEGER              not null,
+   LETTER_NAME          CHAR(33)             not null,
+   LETTER_INWARD        VARCHAR2(100)        not null,
+   USER_ID_FK           INTEGER              not null,
+   constraint PK_LETTER primary key (LETTER_ID)
+);
+
+/*==============================================================*/
+/* Index: USER_SENDS_A_LETTER_FK                                */
+/*==============================================================*/
+create index USER_SENDS_A_LETTER_FK on LETTER (
+   USER_ID_FK ASC
+);
+
+/*==============================================================*/
+/* Table: "USER"                                                */
+/*==============================================================*/
+create table "USER" 
+(
+   USER_ID              INTEGER              not null,
+   USER_EMAIL           VARCHAR2(33)         not null,
+   USER_PASSWORD        VARCHAR2(33)         not null,
+   USER_NAME            VARCHAR2(33)         not null,
+   USER_COUNTRY         VARCHAR2(33)         not null,
+   USER_BIRTHDAY        DATE,
+   VOTE_ID_FK           INTEGER,
+   constraint PK_USER primary key (USER_ID)
+);
+
+/*==============================================================*/
+/* Index: USER_IS_VOTING_FK                                     */
+/*==============================================================*/
+create index USER_IS_VOTING_FK on "USER" (
+   VOTE_ID_FK ASC
+);
+
+/*==============================================================*/
+/* Table: VOTE                                                  */
+/*==============================================================*/
+create table VOTE 
+(
+   VOTE_ID              INTEGER              not null,
+   VOTE_NAME            VARCHAR2(33)         not null,
+   USER_ID_FK           INTEGER              not null,
+   constraint PK_VOTE primary key (VOTE_ID)
+);
+
+/*==============================================================*/
+/* Index: USER_IS_VOTING2_FK                                    */
+/*==============================================================*/
+create index USER_IS_VOTING2_FK on VOTE (
+   USER_ID_FK ASC
+);
+
+alter table GIFT
+   add constraint FK_GIFT_EXS_IN_GL foreign key (GIFT_ID_FK)
+      references GIFT_LIST (GIFT_ID);
+
+alter table GIFT
+   add constraint FK_USER_SEND_GIFT foreign key (USER_ID_FK)
+      references "USER" (USER_ID);
+
+alter table LETTER
+   add constraint FK_USER_SEND_LETTER foreign key (USER_ID_FK)
+      references "USER" (USER_ID);
+
+alter table "USER"
+   add constraint FK_USER_VOTE foreign key (VOTE_ID_FK)
+      references VOTE (VOTE_ID);
+
+alter table VOTE
+   add constraint FK_VOTE_USER foreign key (USER_ID_FK)
+      references "USER" (USER_ID);
+
+/* constraints */
+
+ALTER TABLE "USER"
+  ADD CONSTRAINT check_email
+  CHECK ( REGEXP_LIKE ("USER_EMAIL", '[A-Za-z0-9._,!#?]+@+[a-zA-Z._]+\.[a-z]{1,4}'));
+  
+  ALTER TABLE "USER"
+  ADD CONSTRAINT email_unique UNIQUE ("USER_EMAIL");
+  
+ALTER TABLE "USER"
+  ADD CONSTRAINT check_password
+  CHECK ( REGEXP_LIKE ("USER_PASSWORD", '[A-Za-z 0-9.,!#$%^&*_]{7,33}'));
+
+ALTER TABLE "USER"
+  ADD CONSTRAINT check_name 
+  CHECK (REGEXP_LIKE("USER_NAME",'[A-Z][a-z]{1,33}','c'));
+
+ALTER TABLE "USER"
+  ADD CONSTRAINT chek_user_birthday
+  CHECK ("USER_BIRTHDAY">TO_DATE('1920-01-01', 'YYYY-MM-DD'));
+
+ALTER TABLE "USER"
+  ADD CONSTRAINT check_country 
+  CHECK (REGEXP_LIKE("USER_COUNTRY",'[A-Z][a-z]{1,33}','c'));
+
+ALTER TABLE "VOTE"
+  ADD CONSTRAINT check_vote 
+  CHECK (REGEXP_LIKE("VOTE_NAME",'[A-Z][a-z]{1,33}','c'));
+
+ALTER TABLE "LETTER"
+  ADD CONSTRAINT check_letter_name 
+  CHECK (REGEXP_LIKE("LETTER_NAME",'[A-Z][a-z]{1,33}','c'));
+
+ALTER TABLE "LETTER"
+  ADD CONSTRAINT check_letter_inward 
+  CHECK (REGEXP_LIKE("LETTER_INWARD",'[A-Z][a-z]{1,33}','c'));
+
+ALTER TABLE "GIFT_LIST"
+  ADD CONSTRAINT check_gift_name 
+  CHECK (REGEXP_LIKE("GIFT_NAME",'[A-Z][a-z]{1,33}','c'));
+
+ALTER TABLE GIFT_LIST
+ADD CONSTRAINT check_gift_list_capacity CHECK ((GIFT_LIST_CAPACITY > 0) AND (GIFT_LIST_CAPACITY < 100));
+
+ALTER TABLE "GIFT_LIST"
+  ADD CONSTRAINT check_gift_description 
+  CHECK (REGEXP_LIKE("GIFT_DESCRIPTION",'[A-Z][a-z]{1,33}','c'));
+
+/* views */
+
+CREATE OR REPLACE VIEW USER_VIEW
+AS
+SELECT USER_ID AS US_ID, USER_EMAIL AS US_EMAIL, USER_PASSWORD AS US_PASSWORD, USER_NAME AS US_NAME, USER_COUNTRY AS US_COUNTRY, USER_BIRTHDAY AS US_BIRTHDAY, VOTE_ID_FK AS V_ID_FK
+FROM "USER"
+WHERE VOTE_ID_FK IS NOT NULL;
+
+CREATE OR REPLACE VIEW LETTER_VIEW1
+AS
+SELECT LETTER_ID AS LET_ID, LETTER_NAME AS LET_NAME, LETTER_INWARD AS LET_INWARD, USER_ID_FK AS US_ID_FK
+FROM LETTER
+WHERE USER_ID_FK < > 5 AND LETTER_INWARD NOT LIKE '%Fuck%';
+
+CREATE OR REPLACE VIEW GIFT_LIST_VIEW
+AS
+SELECT GIFT_ID AS GIF_ID, GIFT_NAME AS GIF_NAME, GIFT_LIST_CAPACITY AS GIF_LIST_CAPACITY, GIFT_DESCRIPTION AS GIF_DESCRIPTION
+FROM GIFT_LIST
+WHERE GIFT_ID < > 5;
+
+CREATE OR REPLACE VIEW GIFT_VIEW
+AS
+SELECT GIFT_ID_FK AS GIF_ID_FK, GIFT_NAME_FK AS GIF_NAME_FK, USER_ID_FK AS US_ID_FK
+FROM GIFT
+WHERE USER_ID_FK < > 5;
+
+CREATE OR REPLACE VIEW VOTE_VIEW
+AS
+SELECT VOTE_ID AS V_ID, VOTE_NAME AS V_NAME, USER_ID_FK AS US_ID_FK
+FROM VOTE
+WHERE USER_ID_FK < > 5;
+
+/* triggers */
+
+CREATE OR REPLACE TRIGGER INSERT_USER
+INSTEAD OF INSERT ON USER_VIEW
+FOR EACH ROW
+begin
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    INSERT INTO "USER"(USER_ID, USER_EMAIL, USER_PASSWORD, USER_NAME, USER_COUNTRY, USER_BIRTHDAY,VOTE_ID_FK)
+    VALUES(:NEW.US_ID, :NEW.US_EMAIL, :NEW.US_PASSWORD, :NEW.US_NAME, :NEW.US_COUNTRY, :NEW.US_BIRTHDAY, :NEW.V_ID_FK);
+EXCEPTION
+	WHEN OTHERS THEN
+		raise_application_error (-20002,'Sorry, error.');
+end;
+
+CREATE OR REPLACE TRIGGER INSERT_VOTE
+INSTEAD OF INSERT ON VOTE_VIEW
+FOR EACH ROW
+begin
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    INSERT INTO VOTE(VOTE_ID, VOTE_NAME, USER_ID_FK)
+    VALUES(:NEW.V_ID, :NEW.V_NAME, :NEW.US_ID_FK);
+EXCEPTION
+	WHEN OTHERS THEN
+		raise_application_error (-20002,'Sorry, error.');
+end;
+
+CREATE OR REPLACE TRIGGER INSERT_LETTER
+INSTEAD OF INSERT ON LETTER_VIEW
+FOR EACH ROW
+begin
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    INSERT INTO LETTER(LETTER_ID, LETTER_NAME, LETTER_INWARD, USER_ID_FK)
+    VALUES(:NEW.LET_ID, :NEW.LET_NAME, :NEW.LET_INWARD, NEW.US_ID_FK);
+EXCEPTION
+	WHEN OTHERS THEN
+		raise_application_error (-20002,'Sorry, error.');
+end;
+
+CREATE OR REPLACE TRIGGER INSERT_GIFT_LIST
+INSTEAD OF INSERT ON GIFT_LIST_VIEW
+FOR EACH ROW
+begin
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    INSERT INTO GIFT_LIST(GIFT_ID, GIFT_NAME, GIFT_DESCRIPTION, GIFT_LIST_CAPACITY)
+    VALUES(:NEW.GIF_ID, :NEW.GIF_NAME, :NEW.GIF_DESCRIPTION, :NEW.GIF_CAPACITY);
+EXCEPTION
+	WHEN OTHERS THEN
+		raise_application_error (-20002,'Sorry, error.');
+end;
+
+CREATE OR REPLACE TRIGGER INSERT_GIFT
+INSTEAD OF INSERT ON GIFTVIEW
+FOR EACH ROW
+begin
+	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    INSERT INTO GIFT(GIFT_ID_FK, GIFT_NAME_FK, USER_ID_FK)
+    VALUES(:NEW.GIF_ID_FK, :NEW.GIF_NAME_FK, :NEW.US_ID_FK);
+EXCEPTION
+	WHEN OTHERS THEN
+		raise_application_error (-20002,'Sorry, error.');
+end;
+
+
+
+
